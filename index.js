@@ -2,6 +2,19 @@
 require('dotenv').config();
 
 const { Client, GatewayIntentBits } = require('discord.js');
+const express = require('express');
+
+// Create a simple Express server to keep Vercel from shutting down
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get('/', (req, res) => {
+    res.send('Bot is running!');
+});
+
+app.listen(PORT, () => {
+    console.log(`Express server running on port ${PORT}`);
+});
 
 // Create a new Discord client with the necessary intents
 const bot = new Client({
@@ -13,7 +26,7 @@ const bot = new Client({
     ]
 });
 
-// Login to your bot using the token from the .env file
+// Login to your bot using the token from the environment variable
 bot.login(process.env.DISCORD_BOT_TOKEN)
     .then(() => {
         console.log('Bot logged in successfully!');
@@ -27,6 +40,12 @@ bot.on('ready', () => {
     console.log(`Logged in as ${bot.user.tag}!`);
     bot.user.setUsername("Markbot Interactive V.2");  // Set bot's name
     bot.user.setAvatar("https://i.ibb.co/Vchbt04x/Markbot-pfp.jpg");  // Set bot's avatar
+
+    // Set custom status to "Just chilling"
+    bot.user.setPresence({
+        activities: [{ name: 'Just chilling', type: 'PLAYING' }],
+        status: 'online',
+    });
 });
 
 // Catch any errors and print them to the console
@@ -78,17 +97,4 @@ bot.on('guildMemberRemove', member => {
 
     // Send the goodbye message
     channel.send(`I can announce that ${member.user.tag} has left the server, what a pity :(`);
-});
-
-// Log out errors to the console for debugging
-bot.on('error', console.error);
-bot.on('warn', console.warn);
-bot.on('debug', console.log);
-
-// Set custom status to "Just chilling"
-bot.on('ready', () => {
-    bot.user.setPresence({
-        activities: [{ name: 'Just chilling', type: 'PLAYING' }],
-        status: 'online',
-    });
 });
