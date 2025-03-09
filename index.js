@@ -16,6 +16,9 @@ app.listen(PORT, () => {
     console.log(`Express server running on port ${PORT}`);
 });
 
+// Log the token to check if it's loaded correctly
+console.log("Bot Token: ", process.env.DISCORD_BOT_TOKEN);  // <-- Add this line to check the token
+
 // Create a new Discord client with the necessary intents
 const bot = new Client({
     intents: [
