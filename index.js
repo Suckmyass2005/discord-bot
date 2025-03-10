@@ -1,10 +1,10 @@
 // Load environment variables from the .env file
 require('dotenv').config();
 
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
 const express = require('express');
 
-// Create a simple Express server to keep Vercel from shutting down
+// Create a simple Express server to prevent shutdown
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -16,50 +16,40 @@ app.listen(PORT, () => {
     console.log(`Express server running on port ${PORT}`);
 });
 
-// Log the token to check if it's loaded correctly
-console.log("Bot Token: ", process.env.DISCORD_BOT_TOKEN);  // <-- Add this line to check the token
+// Check if the token is loaded correctly
+if (!process.env.DISCORD_BOT_TOKEN) {
+    console.error("Error: DISCORD_BOT_TOKEN is not set in the environment variables!");
+    process.exit(1); // Exit the bot if no token is provided
+}
 
 // Create a new Discord client with the necessary intents
 const bot = new Client({
     intents: [
-        GatewayIntentBits.Guilds,            // For guild events
-        GatewayIntentBits.GuildMembers,      // For member-related events
-        GatewayIntentBits.GuildMessages,     // For message events
-        GatewayIntentBits.MessageContent     // To read message content
+        GatewayIntentBits.Guilds, 
+        GatewayIntentBits.GuildMembers, 
+        GatewayIntentBits.GuildMessages, 
+        GatewayIntentBits.MessageContent
     ]
 });
 
-// Login to your bot using the token from the environment variable
+// Login to the bot using the token from the environment variables
 bot.login(process.env.DISCORD_BOT_TOKEN)
-    .then(() => {
-        console.log('Bot logged in successfully!');
-    })
-    .catch(error => {
-        console.error('Error during bot login:', error);
-    });
+    .then(() => console.log('Bot logged in successfully!'))
+    .catch(error => console.error('Error during bot login:', error));
 
-// Set the bot's username and avatar when it logs in
+// Bot ready event
 bot.on('ready', () => {
     console.log(`Logged in as ${bot.user.tag}!`);
-    bot.user.setUsername("Markbot Interactive V.2");  // Set bot's name
-    bot.user.setAvatar("https://i.ibb.co/Vchbt04x/Markbot-pfp.jpg");  // Set bot's avatar
 
-    // Set custom status to "Just chilling"
+    // Set bot properties
+    bot.user.setUsername("Markbot Interactive V.2");
+    bot.user.setAvatar("https://i.ibb.co/Vchbt04x/Markbot-pfp.jpg");
+
+    // Set custom status
     bot.user.setPresence({
-        activities: [{ name: 'Just chilling', type: 'PLAYING' }],
+        activities: [{ name: 'Just chilling', type: ActivityType.Playing }],
         status: 'online',
     });
-});
-
-// Catch any errors and print them to the console
-bot.on('error', (error) => {
-    console.error('Bot encountered an error:', error);
-});
-bot.on('warn', (warn) => {
-    console.warn('Bot warning:', warn);
-});
-bot.on('debug', (debugInfo) => {
-    console.log('Bot debug info:', debugInfo);
 });
 
 // Welcome message when a user joins the server
@@ -71,7 +61,7 @@ bot.on('guildMemberAdd', member => {
         return;
     }
 
-    // Send the welcome message
+    // Send welcome message
     channel.send(`${member.user.tag} welcome to ${member.guild.name}! 
 
 If you're going to participate, then please choose your team from <#999961475911262238>. Once you do so, please post your characters in either <#999961816430039150> or <#999961864651935764>, according to the <#1000398951679283310>.
@@ -98,6 +88,11 @@ bot.on('guildMemberRemove', member => {
         return;
     }
 
-    // Send the goodbye message
+    // Send goodbye message
     channel.send(`I can announce that ${member.user.tag} has left the server, what a pity :(`);
 });
+
+// Error handling
+bot.on('error', error => console.error('Bot encountered an error:', error));
+bot.on('warn', warn => console.warn('Bot warning:', warn));
+bot.on('debug', debugInfo => console.log('Bot debug info:', debugInfo));
